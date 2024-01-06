@@ -22,6 +22,7 @@ import (
 	"net"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
@@ -43,6 +44,7 @@ type Endpoint struct {
 type Watcher struct {
 	NodePodNamesWatch             *ServerInstanceInfo
 	EndpointWatch                 libs.Watcher
+	clickhouseEndpointNamespace   string
 	clickhouseEndpointKey         string
 	clickhouseEndpointTCPPortName string
 	myNodeName                    string
@@ -67,7 +69,14 @@ func NewWatcher(myNodeName, myPodName, myPodNamespace, clickhouseEndpointKey, cl
 		return nil, errMsg
 	}
 
-	endpointsWatcher, err := libs.StartCoreV1EndpointsWatcher(context.Background(), libs.NewKubernetesWatchClient(kubernetesClient), myPodNamespace)
+	clickhouseEndpointNamespace := myPodNamespace
+	if fields := strings.Split(clickhouseEndpointKey, "."); len(fields) == 2 {
+		// SERVICE.NAMESPACE
+		clickhouseEndpointKey = fields[0]
+		clickhouseEndpointNamespace = fields[1]
+	}
+
+	endpointsWatcher, err := libs.StartCoreV1EndpointsWatcher(context.Background(), libs.NewKubernetesWatchClient(kubernetesClient), clickhouseEndpointNamespace)
 	if err != nil {
 		errMsg := fmt.Errorf("create endpoints watcher failed: %v", err)
 		log.Warning(errMsg)
@@ -86,6 +95,7 @@ func NewWatcher(myNodeName, myPodName, myPodNamespace, clickhouseEndpointKey, cl
 	watcher := &Watcher{
 		NodePodNamesWatch:             nodePodNamesWatch,
 		EndpointWatch:                 endpointsWatcher,
+		clickhouseEndpointNamespace:   clickhouseEndpointNamespace,
 		clickhouseEndpointKey:         clickhouseEndpointKey,
 		clickhouseEndpointTCPPortName: clickhouseEndpointTCPPortName,
 		myNodeName:                    myNodeName,
@@ -323,7 +333,7 @@ func (w *Watcher) getNodeEndpoints() (map[string][]Endpoint, error) {
 		log.Debugf("get node endpoints %+v", nodeEndpoints)
 		return nodeEndpoints, nil
 	}
-	return nil, fmt.Errorf("get endpoint(%s) empty, timeout is %d", w.clickhouseEndpointKey, TIMEOUT)
+	return nil, fmt.Errorf("get endpoint(%s/%s) empty, timeout is %d", w.clickhouseEndpointNamespace, w.clickhouseEndpointKey, TIMEOUT)
 }
 
 func (w *Watcher) getEndpoints() ([]Endpoint, error) {
