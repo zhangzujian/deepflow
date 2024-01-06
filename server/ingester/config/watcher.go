@@ -292,6 +292,7 @@ func (w *Watcher) getPodNames() ([]string, error) {
 }
 
 func (w *Watcher) getNodeEndpoints() (map[string][]Endpoint, error) {
+	log.Infof("getting endpoint with port %q", w.clickhouseEndpointTCPPortName)
 	for i := 0; i < TIMEOUT; i++ {
 		entries := w.EndpointWatch.Entries()
 		nodeEndpoints := make(map[string][]Endpoint)
@@ -307,6 +308,7 @@ func (w *Watcher) getNodeEndpoints() (map[string][]Endpoint, error) {
 			for _, v := range e.Subsets {
 				port := uint16(0)
 				for _, p := range v.Ports {
+					log.Infof("found endpoint port %q", p.Name)
 					if p.Name == w.clickhouseEndpointTCPPortName {
 						port = uint16(p.Port)
 						break
