@@ -243,8 +243,10 @@ func (c *Config) Validate() error {
 		c.CKDB.Port = DefaultCKDBServicePort
 	}
 	if c.CKDB.EndpointTCPPortName == "" {
+		log.Infof("setting default EndpointTCPPortName to %s", DefaultCKDBEndpointTCPPortName)
 		c.CKDB.EndpointTCPPortName = DefaultCKDBEndpointTCPPortName
 	}
+	log.Infof("c.CKDB.EndpointTCPPortName is %s", c.CKDB.EndpointTCPPortName)
 	if c.CKDB.ClusterName == "" {
 		if c.CKDB.External {
 			c.CKDB.ClusterName = "default"
