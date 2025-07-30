@@ -45,13 +45,13 @@ pub use sql::{
     PostgresqlLog, RedisInfo, RedisLog,
 };
 
+pub mod tls;
+pub use tls::{TlsInfo, TlsLog};
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "enterprise")] {
-        pub mod tls;
-
         pub use sql::{OracleInfo, OracleLog};
         pub use rpc::{SomeIpInfo, SomeIpLog};
-        pub use tls::{TlsInfo, TlsLog};
     }
 }
 
