@@ -87,6 +87,7 @@ cfg_if::cfg_if! {
             PingInfo(PingInfo),
             CustomInfo(CustomInfo),
             // add new protocol info below
+            TlsInfo(crate::flow_generator::protocol_logs::TlsInfo),
         );
     } else {
         all_protocol_info!(

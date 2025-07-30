@@ -3094,7 +3094,6 @@ impl UserConfig {
         {
             new.insert(dns_str.to_string(), Self::DEFAULT_DNS_PORTS.to_string());
         }
-        #[cfg(feature = "enterprise")]
         {
             let tls_str =
                 L7ProtocolParser::TLS(crate::flow_generator::protocol_logs::TlsLog::default())
@@ -3108,23 +3107,6 @@ impl UserConfig {
                 .contains_key(tls_str)
             {
                 new.insert(tls_str.to_string(), Self::DEFAULT_TLS_PORTS.to_string());
-            }
-            let oracle_str = L7ProtocolParser::Oracle(
-                crate::flow_generator::protocol_logs::OracleLog::default(),
-            )
-            .as_str();
-            // oracle default only parse 1521 port. when l7_protocol_ports config without ORACLE, need to reserve the oracle default config.
-            if !self
-                .processors
-                .request_log
-                .filters
-                .port_number_prefilters
-                .contains_key(oracle_str)
-            {
-                new.insert(
-                    oracle_str.to_string(),
-                    Self::DEFAULT_ORACLE_PORTS.to_string(),
-                );
             }
         }
         let memcached_str = L7ProtocolParser::Memcached(MemcachedLog::default()).as_str();

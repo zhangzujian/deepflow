@@ -188,6 +188,7 @@ cfg_if::cfg_if! {
                 OpenWire(OpenWireLog),
                 Ping(PingLog),
                 // add protocol below
+                TLS(crate::flow_generator::protocol_logs::TlsLog),
             }
         }
     } else {
